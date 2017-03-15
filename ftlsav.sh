@@ -69,7 +69,7 @@ while true; do
 			for line in `ls -1 .`
 			do
 				if [[ $line == *.ae.sav.bak ]]; then
-			    	let i=$i+1
+					let i=$i+1
 					cmp=""
 					if [ -e "ae_prof.sav" ];
 					then
@@ -79,7 +79,7 @@ while true; do
 						fi
 					fi
 					stat=$(stat -f "%Sm" -t "%Y-%m-%d @ %H:%M" $line)
-			    	w+=("$line" ${line%".ae.sav.bak"}$cmp" ($stat)" )
+					w+=("$line" ${line%".ae.sav.bak"}$cmp" ($stat)" )
 				fi
 			done
 			if [ ${#w[@]} -eq 0 ]
@@ -95,7 +95,7 @@ while true; do
 						cmp --silent "$file" "ae_prof.sav"
 						if [ $? -eq 0 ]; then
 							dialog --msgbox "File '$file' is the same as 'ae_prof.sav' No reason to overwrite." 6 60
-							#save=false
+							save=false
 						fi
 					fi
 					if [ "$save" = true ];
