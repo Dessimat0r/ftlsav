@@ -16,24 +16,38 @@ fi
 IFS=$'\n' # set field separator to newline
 while true; do
 	contsav="does not exist"
+	nsav="does not exist"
 	aesav="does not exist"
 	if [ -e "ae_prof.sav" ];
 	then
 		stat=$(stat -f "%Sm" -t "%Y-%m-%d @ %H:%M" ae_prof.sav)
 		aesav="$stat"
 	fi
+	if [ -e "prof.sav" ];
+	then
+		stat=$(stat -f "%Sm" -t "%Y-%m-%d @ %H:%M" prof.sav)
+		nsav="$stat"
+	fi
 	if [ -e "continue.sav" ];
 	then
 		stat=$(stat -f "%Sm" -t "%Y-%m-%d @ %H:%M" continue.sav)
 		contsav="$stat"
 	fi
-	menuitem=$(dialog --title "FTL Save Scumming Tool 0.86" --keep-tite --no-cancel --no-ok --menu "Backup an FTL saved game to another file. Note that you may have a non-AE saved game. This is for AE saves only.\n(p) ae_prof.sav:  $aesav\n(c) continue.sav: $contsav" 17 55 6 "Backup" "Backup saved game" "Restore" "Restore saved game" "Rename" "Rename saved game (TODO)" "Delete" "Delete saved game (TODO)" "Refresh" "" "Quit" "" 2>&1 >/dev/tty)
+	menuitem=$(dialog --title "FTL Save Scumming Tool 0.87" --keep-tite --no-cancel --no-ok --menu "Backup an FTL saved game to another file. Note that you may have a non-AE saved game. This is for AE saves only.\n(n) prof.sav:     $nsav\n(p) ae_prof.sav:  $aesav\n(c) continue.sav: $contsav" 20 55 8 "Backup" "Backup saved game" "AE Backup" "Backup AE saved game" "Restore" "Restore saved game" "AE Restore" "Restore AE saved game" "Rename" "Rename saved game (TODO)" "Delete" "Delete saved game (TODO)" "Refresh" "" "Quit" "" 2>&1 >/dev/tty)
 	# Return status of non-zero indicates cancel
 	if [ $? -eq 0 ]
 	then
 		case $menuitem in
 		Backup)
-			if [ -e "continue.sav" ];
+			if [ -e "ae_prof.sav" ];
+			then
+				break;
+			else
+				dialog --msgbox "'prof.sav' doesn't exist. Have you started any normal campaigns yet?" 6 60
+			fi
+			;;
+		"AE Backup")
+			if [ -e "ae_prof.sav" ];
 			then
 				while true; do
 					filename=$(dialog --title "Enter filename" --keep-tite --inputbox "Enter the filename for the saved game" 10 45 2>&1 >/dev/tty)
@@ -48,7 +62,6 @@ while true; do
 						else
 							save=true;
 							aeproffn=${filename%".prof.ae.sav.bak"}".prof.ae.sav.bak"
-							echo $aeproffn
 							if [ -e $aeproffn ];
 							then
 								stat=$(stat -f "%Sm" -t "%Y-%m-%d @ %H:%M" "$aeproffn")
@@ -60,7 +73,6 @@ while true; do
 							if [ "$save" = true ];
 							then
 								aecontfn=${filename%".cont.ae.sav.bak"}".cont.ae.sav.bak"
-								echo $aecontfn
 								if [ -e $aecontfn ];
 								then
 									stat=$(stat -f "%Sm" -t "%Y-%m-%d @ %H:%M" "$aecontfn")
@@ -73,7 +85,9 @@ while true; do
 							if [ "$save" = true ];
 							then
 								cp -fp "ae_prof.sav" "$aeproffn"
-								cp -fp "continue.sav" "$aecontfn"
+								if [ -e $contfn ]; then
+									cp -fp "continue.sav" "$aecontfn"
+								fi
 								dialog --msgbox "File 'ae_prof.sav' copied to file '$aeproffn'. File 'continue.sav' copied to file '$aecontfn'." 8 60
 								break
 							fi
@@ -83,16 +97,18 @@ while true; do
 					fi
 				done
 			else
-				dialog --msgbox "continue.sav doesn't exist. Make sure to save your FTL game first." 5 60
+				dialog --msgbox "'ae_prof.sav' doesn't exist. Have you started any advanced campaigns yet?" 6 60
 			fi
 			;;
 		Restore)
+			break;
+			;;
+		"AE Restore")
 			while true; do
 				let i=0 # define counting variable
 				w=() # define working array
 				for line in `ls -1t .`
 				do
-					echo $line
 					if [[ $line == *.prof.ae.sav.bak ]]; then
 						filename=${line%".prof.ae.sav.bak"}
 						let i=$i+1
@@ -126,7 +142,6 @@ while true; do
 					dialog --msgbox "No save backups found. Looking for files ending in '.prof.ae.sav.bak'." 6 60
 					break
 				else # have items
-					echo ${w[@]}
 					file=$(dialog --title "Select file to restore" --keep-tite --no-tags --menu "Choose a save to restore to ae_prof.sav and continue.sav (copied files will remain). (pc) indicates this save has the same contents as ae_prof.sav and continue.sav." 15 60 10 "${w[@]}" 2>&1 >/dev/tty) # show dialog and store output
 					if [ $? -eq 0 ]; then # continue
 						save=true;
@@ -197,3 +212,4 @@ while true; do
 		echo "Cancelled."
 	fi
 done
+clear
