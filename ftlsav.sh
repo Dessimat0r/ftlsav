@@ -27,7 +27,7 @@ while true; do
 		stat=$(stat -f "%Sm" -t "%Y-%m-%d @ %H:%M" continue.sav)
 		contsav="$stat"
 	fi
-	menuitem=$(dialog --title "FTL Save Backup" --keep-tite --no-cancel --no-ok --menu "Backup an FTL saved game to another file. Note that you may have a non-AE saved game. This is for AE saves only.\n(*) ae_prof.sav: $aesav\n(*) continue.sav: $contsav" 16 55 5 "Backup" "Backup saved game" "Restore" "Restore saved game" "Rename" "Rename saved game (TODO)" "Delete" "Delete saved game (TODO)" "Quit" "Quit" 2>&1 >/dev/tty)
+	menuitem=$(dialog --title "FTL Save Scumming Tool 0.86" --keep-tite --no-cancel --no-ok --menu "Backup an FTL saved game to another file. Note that you may have a non-AE saved game. This is for AE saves only.\n(p) ae_prof.sav:  $aesav\n(c) continue.sav: $contsav" 17 55 6 "Backup" "Backup saved game" "Restore" "Restore saved game" "Rename" "Rename saved game (TODO)" "Delete" "Delete saved game (TODO)" "Refresh" "" "Quit" "" 2>&1 >/dev/tty)
 	# Return status of non-zero indicates cancel
 	if [ $? -eq 0 ]
 	then
@@ -52,7 +52,7 @@ while true; do
 							if [ -e $aeproffn ];
 							then
 								stat=$(stat -f "%Sm" -t "%Y-%m-%d @ %H:%M" "$aeproffn")
-								dialog --yesno "A file named '$aeproffn' already exists (modified $stat). Overwrite?" 6 60
+								dialog --yesno "A file named '$aeproffn' already exists (modified $stat). Overwrite?" 7 60
 								if [ $? -ne 0 ]; then # no
 									save=false
 								fi
@@ -64,7 +64,7 @@ while true; do
 								if [ -e $aecontfn ];
 								then
 									stat=$(stat -f "%Sm" -t "%Y-%m-%d @ %H:%M" "$aecontfn")
-									dialog --yesno "A file named '$aecontfn' already exists (modified $stat). Overwrite?" 6 60
+									dialog --yesno "A file named '$aecontfn' already exists (modified $stat). Overwrite?" 7 60
 									if [ $? -ne 0 ]; then # no
 										save=false
 									fi
@@ -72,9 +72,9 @@ while true; do
 							fi
 							if [ "$save" = true ];
 							then
-								cp -f "ae_prof.sav" "$aeproffn"
-								cp -f "continue.sav" "$aecontfn"
-								dialog --msgbox "File 'ae_prof.sav' copied to file '$aeproffn'. File 'continue.sav' copied to file '$aecontfn'." 6 60
+								cp -fp "ae_prof.sav" "$aeproffn"
+								cp -fp "continue.sav" "$aecontfn"
+								dialog --msgbox "File 'ae_prof.sav' copied to file '$aeproffn'. File 'continue.sav' copied to file '$aecontfn'." 8 60
 								break
 							fi
 						fi
@@ -90,7 +90,7 @@ while true; do
 			while true; do
 				let i=0 # define counting variable
 				w=() # define working array
-				for line in `ls -1 .`
+				for line in `ls -1t .`
 				do
 					echo $line
 					if [[ $line == *.prof.ae.sav.bak ]]; then
@@ -173,9 +173,9 @@ while true; do
 								if [ "$save" = true ];
 								then
 									line="File '$file' restored to 'ae_prof.sav'."
-									cp -f "$file" "ae_prof.sav"
+									cp -fp "$file" "ae_prof.sav"
 									if [ -e $contfn ]; then
-										cp -f "$contfn" "continue.sav"
+										cp -fp "$contfn" "continue.sav"
 										line=" File '$contfn' restored to 'continue.sav'."
 									fi
 									dialog --msgbox "$line" 6 60
