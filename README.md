@@ -1,4 +1,4 @@
-# FTL Savescumming Tool 0.86
+# FTL Savescumming Tool 0.87
 Use this to backup your FTL save when you exit Faster Than Light, and to restore saves when you need them. This won't fix your savescumming conscience though.
 
 ## Installation/Usage
